@@ -35,5 +35,74 @@ Comment.last.recipe
 => #<Recipe:0x007fbba2e6cf98 id: 6, name: "BS & Bacon", created_at: 2015-06-17 04:11:55 UTC, updated_at: 2015-06-17 04:11:55 UTC>
 
 #7 - How would you return all comments that include the string brussels in them?
-Comment.where("body LIKE '%brussels%'")
+Comment.where("body ILIKE '%brussels%'")
 => [#<Comment:0x007fbba2c06448 id: 6, recipe_id: 7, body: "scallosp & brussels sprouts? really?">]
+
+#-- Recipe Validations --#
+
+# Validate that the title of each recipe exists.
+[27] pry(main)> new_recipe = Recipe.create(name:"" )
+=> #<Recipe:0x007fce527adaa0 id: nil, name: "", created_at: nil, updated_at: nil, yield: nil>
+
+[28] pry(main)> new_recipe.errors
+=> #<ActiveModel::Errors:0x007fce527ac7e0
+ @base=#<Recipe:0x007fce527adaa0 id: nil, name: "", created_at: nil, updated_at: nil, yield: nil>,
+ @messages={:name=>["must include Brussels sprouts in recipe name", "can't be blank"]}>
+
+# Validate that the title of each recipe is unique.
+[29] pry(main)> new_recipe = Recipe.create(name: "BS & Steak")
+=> #<Recipe:0x007fce51d74f98 id: nil, name: "BS & Steak", created_at: nil, updated_at: nil, yield: nil>
+
+[30] pry(main)> new_recipe.errors
+=> #<ActiveModel::Errors:0x007fce51d6e3f0
+ @base=#<Recipe:0x007fce51d74f98 id: nil, name: "BS & Steak", created_at: nil, updated_at: nil, yield: nil>,
+ @messages={:name=>["must include Brussels sprouts in recipe name", "has already been taken"]}>
+
+# Validate that the title of each recipe contains "Brussels sprouts" in it.
+[31] pry(main)> new_recipe = Recipe.create(name: "Fish Tacos")
+=> #<Recipe:0x007fce51cd7ba8 id: nil, name: "Fish Tacos", created_at: nil, updated_at: nil, yield: nil>
+
+[32] pry(main)> new_recipe.errors
+=> #<ActiveModel::Errors:0x007fce51cd6bb8
+ @base=#<Recipe:0x007fce51cd7ba8 id: nil, name: "Fish Tacos", created_at: nil, updated_at: nil, yield: nil>,
+ @messages={:name=>["must include Brussels sprouts in recipe name"]}>
+
+# Add a field yield to your Recipe table. Yield is explained here. yield is optional, but if supplied, it must be greater than or equal to 1. Write a validation for this.
+
+[33] pry(main)> new_recipe = Recipe.create(name: "Brussels sprouts soup", yield: 0)
+=> #<Recipe:0x007fce51c43408 id: nil, name: "Brussels sprouts soup", created_at: nil, updated_at: nil, yield: 0>
+
+[34] pry(main)> new_recipe.errors
+=> #<ActiveModel::Errors:0x007fce51c419c8
+ @base=#<Recipe:0x007fce51c43408 id: nil, name: "Brussels sprouts soup", created_at: nil, updated_at: nil, yield: 0>,
+ @messages={:yield=>["must be greater than or equal to 1"]}>
+
+#-- Comment Validations --#
+
+# Validate that the length of a comment be a maximum of 140 characters long.
+[45] pry(main)> new_recipe = Recipe.create(name: "Brussels sprouts burritos", yield: 1)
+=> #<Recipe:0x007fce51c91720 id: 9, name: "Brussels sprouts burritos", created_at: 2015-06-18 04:20:48 UTC, updated_at: 2015-06-18 04:20:48 UTC, yield: 1>
+
+[46] pry(main)> new_comment = Comment.create(body: "WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!", recipe_id: new_recipe.id)
+=> #<Comment:0x007fce51cfca20
+ id: nil,
+ recipe_id: 9,
+ body: "WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!">
+
+[47] pry(main)> new_comment.errors
+=> #<ActiveModel::Errors:0x007fce51d07830
+ @base=
+  #<Comment:0x007fce51cfca20
+   id: nil,
+   recipe_id: 9,
+   body: "WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!WIN AN IPHONE!!">,
+ @messages={:body=>["is too long (maximum is 140 characters)"]}>
+
+# Validate that a comment has a recipe.
+[39] pry(main)> new_comment = Comment.create(body: "I really love Brussels sprouts soup!")
+=> #<Comment:0x007fce51bcf7d8 id: nil, recipe_id: nil, body: "I really love Brussels sprouts soup!">
+
+[40] pry(main)> new_comment.errors
+=> #<ActiveModel::Errors:0x007fce51bccf38
+ @base=#<Comment:0x007fce51bcf7d8 id: nil, recipe_id: nil, body: "I really love Brussels sprouts soup!">,
+ @messages={:recipe_id=>["can't be blank"]}>
